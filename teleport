@@ -1,0 +1,40 @@
+import numpy as np
+from qiskit import *
+from qiskit.visualization import*
+
+q=QuantumRegister(3)
+cz=ClassicalRegister(1)
+cx=ClassicalRegister(1)
+teleportation=QuantumCircuit(q,cz,cx)
+#print (teleportation)
+
+def create_bell_pair(qc, a, b):
+    """Creates a bell pair in qc using qubits a & b"""
+    qc.h(a) 
+    qc.cx(a,b)
+ 
+create_bell_pair(teleportation, 1, 2)
+def alice_gates(qc, psi, a):
+    qc.cx(psi, a)
+    qc.h(psi)
+
+teleportation.barrier()
+alice_gates(teleportation, 0, 1)
+#teleportation.draw()
+
+def measure_and_send(qc, a, b):
+    """Measures qubits a & b and 'sends' the results to Bob"""
+    qc.barrier()
+    qc.measure(a,0)
+    qc.measure(b,1)
+    
+measure_and_send(teleportation, 0 ,1)
+#teleportation.draw()
+
+def bob_gates(qc, qubit, cz, cx):
+    qc.x(qubit).c_if(cx, 1)
+    qc.z(qubit).c_if(cz, 1)
+    
+teleportation.barrier()
+bob_gates(teleportation, 2, cz, cx)
+teleportation.draw()
